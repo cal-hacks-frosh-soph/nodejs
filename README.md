@@ -1,7 +1,6 @@
-tanks
+Tanks
 ======
 
-Multiplayer tank game developed in nodejs.
+What more can you ask for? A game of tanks.
 
-You can play it [here](http://45.55.165.9:8082)
-(Sometimes it's online) 
+Multiplayer tank game developed in nodejs.
