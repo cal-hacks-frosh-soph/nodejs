@@ -7,7 +7,7 @@ var tankName = '';
 var imageName = '';
 
 socket.on('addTank', function(tank){
-	game.addTank(tank.id, tank.imageName, tank.type, tank.isLocal, tank.x, tank.y);
+	game.addTank(tank.id, tank.imageName, tank.type, tank.isLocal, tank.x, tank.y, tank.imageData);
 });
 
 socket.on('sync', function(gameServerData){

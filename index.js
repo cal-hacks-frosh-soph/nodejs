@@ -1,4 +1,6 @@
+var https = require("https");
 var express = require('express');
+request = require('request');
 var app = express();
 var counter = 0;
 var BALL_SPEED = 10;
@@ -25,7 +27,42 @@ function GameServer(){
 GameServer.prototype = {
 
 	addTank: function(tank){
+
+		if(tank.imageName) {
+			var params = {
+				'url':tank.imageName
+			};
+			var options = {
+				protocol: 'https:',
+				host: 'api.projectoxford.ai',
+				path: '/emotion/v1.0/recognize',
+				method: 'POST',
+				headers: {
+				  'Content-Type': 'application/json',
+				  'Ocp-Apim-Subscription-Key': '24d4d3d6035e42c1a4fd8a6e068602a2'
+				}
+			};
+			req = https.request(options, function(res) {
+				console.log('Status: ' + res.statusCode);
+				//console.log('Body: ' + body);
+				console.log('Headers: ' + JSON.stringify(res.headers));
+				res.setEncoding('utf8');
+				res.on('data', function (body) {
+					console.log('Body: ' + body);
+					tank.imageData = body
+					console.log("This is a tank: " + tank);
+				});
+			});
+			req.on('error', function(e) {
+				console.log('problem with request: ' + e.message);
+			});
+			// write data to request body
+			req.write('{"url": "' + tank.imageName + '"}');
+			req.end();
+		}
 		this.tanks.push(tank);
+
+
 	},
 
 	addBall: function(ball){
@@ -125,10 +162,10 @@ io.on('connection', function(client) {
 		console.log(tank.id + ' joined the game');
 		var initX = getRandomInt(40, 900);
 		var initY = getRandomInt(40, 500);
-		client.emit('addTank', { id: tank.id, imageName: tank.imageName, type: tank.type, isLocal: true, x: initX, y: initY, hp: TANK_INIT_HP });
-		client.broadcast.emit('addTank', { id: tank.id, imageName: tank.imageName, type: tank.type, isLocal: false, x: initX, y: initY, hp: TANK_INIT_HP} );
+		client.emit('addTank', { id: tank.id, imageName: tank.imageName, type: tank.type, isLocal: true, x: initX, y: initY, hp: TANK_INIT_HP, imageData: tank.imageData });
+		client.broadcast.emit('addTank', { id: tank.id, imageName: tank.imageName, type: tank.type, isLocal: false, x: initX, y: initY, hp: TANK_INIT_HP, imageData: tank.imageData } );
 
-		game.addTank({ id: tank.id, imageName: tank.imageName, type: tank.type, hp: TANK_INIT_HP});
+		game.addTank({ id: tank.id, imageName: tank.imageName, type: tank.type, hp: TANK_INIT_HP, imageData: tank.imageData });
 	});
 
 	client.on('sync', function(data){

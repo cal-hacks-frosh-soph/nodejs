@@ -21,9 +21,9 @@ function Game(arenaId, w, h, socket){
 
 Game.prototype = {
 
-	addTank: function(id, imageName, type, isLocal, x, y, hp){
+	addTank: function(id, imageName, type, isLocal, x, y, hp, imageData) {
 		console.log("imagename: " + imageName);
-		var t = new Tank(id, imageName, type, this.$arena, this, isLocal, x, y, hp);
+		var t = new Tank(id, imageName, type, this.$arena, this, isLocal, x, y, hp, imageData);
 		if(isLocal){
 			this.localTank = t;
 		}else{
@@ -120,7 +120,7 @@ Game.prototype = {
 			if(!found &&
 				(game.localTank == undefined || serverTank.id != game.localTank.id)){
 				//I need to create it
-				game.addTank(serverTank.id, serverTank.type, false, serverTank.x, serverTank.y, serverTank.hp);
+				game.addTank(serverTank.id, serverTank.imageName, serverTank.type, false, serverTank.x, serverTank.y, serverTank.hp, serverTank.imageData);
 			}
 		});
 
@@ -171,9 +171,10 @@ Ball.prototype = {
 
 }
 
-function Tank(id, imageName, type, $arena, game, isLocal, x, y, hp){
+function Tank(id, imageName, type, $arena, game, isLocal, x, y, hp, imageData){
 	this.id = id;
 	this.imageName = imageName;
+	this.imageData = imageData;
 	this.type = type;
 	this.speed = 5;
 	this.$arena = $arena;
@@ -197,12 +198,21 @@ function Tank(id, imageName, type, $arena, game, isLocal, x, y, hp){
 Tank.prototype = {
 
 	materialize: function(){
-		this.$arena.append('<div id="' + this.id + '" class="tank tank"></div>');
+		if(this.imageName) {
+			this.$arena.append('<div id="' + this.id + '" class="tank tank"></div>');
+			console.log('using image: ' + this.imageName);
+		}
+		else {
+			this.$arena.append('<div id="' + this.id + '" class="tank tank' + this.type + '"></div>');
+			console.log('using default: tank' + this.type);
+		}
+
 		this.$body = $('#' + this.id);
 		this.$body.css('width', this.w);
 		this.$body.css('height', this.h);
-		this.$body.css('background-image', 'url(' + this.imageName + ')');
-		console.log("using image: " + this.imageName);
+
+		if(this.imageName)
+			this.$body.css('background-image', 'url(' + this.imageName + ')');
 
 		this.$body.css('-webkit-transform', 'rotateZ(' + this.baseAngle + 'deg)');
 		this.$body.css('-moz-transform', 'rotateZ(' + this.baseAngle + 'deg)');
