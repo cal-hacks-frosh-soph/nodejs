@@ -4,9 +4,10 @@ var socket = io.connect(window.location.protocol + "//" + window.location.hostna
 var game = new Game('#arena', WIDTH, HEIGHT, socket);
 var selectedTank = 1;
 var tankName = '';
+var imageName = '';
 
 socket.on('addTank', function(tank){
-	game.addTank(tank.id, tank.type, tank.isLocal, tank.x, tank.y);
+	game.addTank(tank.id, tank.imageName, tank.type, tank.isLocal, tank.x, tank.y);
 });
 
 socket.on('sync', function(gameServerData){
@@ -25,14 +26,24 @@ $(document).ready( function(){
 
 	$('#join').click( function(){
 		tankName = $('#tank-name').val();
-		joinGame(tankName, selectedTank, socket);
+		imageName = $('#tank-image').val();
+		console.log("val: " + imageName);
+		joinGame(tankName, imageName, selectedTank, socket);
 	});
 
 	$('#tank-name').keyup( function(e){
 		tankName = $('#tank-name').val();
 		var k = e.keyCode || e.which;
 		if(k == 13){
-			joinGame(tankName, selectedTank, socket);
+			joinGame(tankName, imageName, selectedTank, socket);
+		}
+	});
+
+	$('#tank-image').keyup( function(e){
+		imageName = $('#tank-image').val();
+		var k = e.keyCode || e.which;
+		if(k == 13){
+			joinGame(tankName, imageName, selectedTank, socket);
 		}
 	});
 
@@ -48,9 +59,10 @@ $(window).on('beforeunload', function(){
 	socket.emit('leaveGame', tankName);
 });
 
-function joinGame(tankName, tankType, socket){
+function joinGame(tankName, imageName, tankType, socket){
 	if(tankName != ''){
 		$('#prompt').hide();
-		socket.emit('joinGame', {id: tankName, type: tankType});
+		console.log("join game: " + imageName)
+		socket.emit('joinGame', {id: tankName, imageName: imageName, type: tankType});
 	}
 }
